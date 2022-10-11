@@ -2,6 +2,8 @@ from imutils.video import VideoStream
 import imutils
 import time
 import cv2
+import math
+import numpy as np
 
 '''
 Instructions to use:
@@ -49,20 +51,30 @@ ARUCO_DICT = {
 arucoDict = cv2.aruco.Dictionary_get(ARUCO_DICT["DICT_5X5_100"])
 arucoParams = cv2.aruco.DetectorParameters_create()
 
-vs = VideoStream(src=1).start() #change to required video source
-time.sleep(2.0)
+locations = ""
+
+vs = VideoStream(src=0).start() #change to required video source
+# time.sleep(2.0)
 
 # loop over the frames from the video stream
 while True:
     # grab the frame from the threaded video stream and resize it
-    # to have a maximum width of 1000 pixels
+    aruco_points = []
     frame = vs.read()
     frame = imutils.resize(frame, width=1000)
+    
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+    height, width, channels = frame.shape
+    
     # detect ArUco markers in the input frame
-    (corners, ids, rejected) = cv2.aruco.detectMarkers(frame, arucoDict, parameters=arucoParams)
+    (corners, ids, rejected) = cv2.aruco.detectMarkers(gray, arucoDict, parameters=arucoParams)
 
     # verify *at least* one ArUco marker was detected
-    if len(corners) > 0:
+    
+    
+    
+    if len(corners) > 0:        
         # flatten the ArUco IDs list
         ids = ids.flatten()
         # loop over the detected ArUCo corners
@@ -88,9 +100,23 @@ while True:
             cX = int((topLeft[0] + bottomRight[0]) / 2.0)
             cY = int((topLeft[1] + bottomRight[1]) / 2.0)
             cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
-            # draw the ArUco marker ID on the frame
-            cv2.putText(frame, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        # show the output frame
+            
+            aruco_points.append((cX, cY))
+            
+            cv2.putText(frame, str(markerID) + f" {str(cX)} | {str(cY)}", (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 100, 100), 2)
+
+    cv2.putText(frame, str(width)  + " WIDTH", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    cv2.putText(frame, str(height) + " HEIGHT", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    
+    locations = str(aruco_points)
+    cv2.putText(frame, locations, (10, height-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2) 
+    
+    # Center of the frame cube
+    cv2.rectangle(frame, (int(width/2)-5, int(height/2)-5), (int(width/2)+5, int(height/2)+5), (0, 0, 255), 2)
+    
+    
+
+
     cv2.imshow("Frame", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'): break
 
