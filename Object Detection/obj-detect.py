@@ -2,7 +2,7 @@
 Run YOLOv5 detection inference on images, videos, directories, globs, YouTube, webcam, streams, etc.
 
 Usage - sources:
-    $ python detect.py --weights yolov5s.pt --source 0                               # webcam
+    $ python obj-detect.py --weights yolov5s.pt --source 0                               # webcam
                                                      img.jpg                        g # image
                                                      vid.mp4                         # video
                                                      path/                           # directory
